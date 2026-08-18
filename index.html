@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko" spellcheck="false">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1f2937">
+<meta name="color-scheme" content="light">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Content TO DO">
+<meta name="format-detection" content="telephone=no">
+<title>Daily Content TO DO LIST</title>
+<style>
+:root{--ink:#1f2937;--muted:#6b7280;--line:#d8dde4;--soft:#f6f8fa;--green:#84bd3a;--green2:#4f7d1f;--yellow:#f6c945;--naver:#03c75a;--insta:#c13584;--blogspot:#f57c00;--youtube:#ff0000}
+*{box-sizing:border-box}html,body{margin:0;background:#e9edf1;color:var(--ink);font-family:"Pretendard","Noto Sans KR","Malgun Gothic",Arial,sans-serif}body{padding:18px}
+.page{margin:0 auto 18px;background:#fff;box-shadow:0 8px 28px rgba(0,0,0,.12);page-break-after:always}.portrait{width:210mm;height:297mm;min-height:297mm;padding:11mm;display:flex;flex-direction:column;overflow:hidden}.landscape{width:297mm;min-height:210mm;padding:10mm 12mm}.page:last-of-type{page-break-after:auto}
+.topbar{display:grid;grid-template-columns:1fr 250px;gap:16px;align-items:end;border-bottom:3px solid var(--ink);padding-bottom:8px}.title h1{margin:0;font-size:27px;letter-spacing:-1px}.title p{margin:4px 0 0;color:var(--muted);font-size:11px}.datebox{display:grid;grid-template-columns:1.2fr .8fr;gap:6px;font-size:11px}.field{border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-height:34px}.field b{font-size:9px;color:var(--muted);display:block;margin-bottom:2px}.field input{width:100%;border:0;background:transparent;font:inherit;outline:none}
+[contenteditable=true]{outline:none;text-decoration:none}[contenteditable=true]::spelling-error{text-decoration:none}[contenteditable=true]::grammar-error{text-decoration:none}[contenteditable=true]:focus{background:#fffbe6}.summary{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px;margin:10px 0;align-items:stretch}
+.summary>.card{border:1px solid var(--line);border-radius:7px;padding:9px;height:56mm;min-height:56mm;max-height:56mm;overflow:hidden;display:flex;flex-direction:column}
+.card h3{font-size:10px;margin:0 0 5px;color:var(--green2);flex:0 0 auto}
+.summary>.card>.write{font-size:11px;line-height:1.55;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px;scrollbar-width:thin;overscroll-behavior:contain}
+.summary>.card>.write::-webkit-scrollbar{width:5px}
+.summary>.card>.write::-webkit-scrollbar-thumb{background:#c7cdd4;border-radius:10px}
+.daily-todo-card{display:flex;flex-direction:column;height:56mm!important;min-height:56mm!important;max-height:56mm!important;overflow:hidden}
+.daily-todo-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px}
+.daily-todo-head-actions{display:flex;align-items:center;gap:4px}
+.daily-todo-history-btn{padding:3px 7px;font-size:8px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:4px;white-space:nowrap}
+.daily-todo-history-btn:hover{background:#ffedd5}
+.daily-todo-head h3{margin:0}
+.daily-todo-add{padding:3px 7px;font-size:8px;background:#eef6e8;color:#3f6212;border:1px solid #cce3b7;border-radius:4px;white-space:nowrap}
+.daily-todo-list{display:flex;flex-direction:column;gap:3px;flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;overflow-x:hidden;padding-right:3px;scrollbar-width:thin;overscroll-behavior:contain}
+.daily-todo-list::-webkit-scrollbar{width:5px}
+.daily-todo-list::-webkit-scrollbar-thumb{background:#c7cdd4;border-radius:10px}
+
+.daily-todo-row{display:grid;grid-template-columns:16px minmax(0,1fr) 18px;gap:4px;align-items:start;font-size:9px;line-height:1.35}
+.daily-todo-check{width:13px;height:13px;margin:1px 0 0;accent-color:var(--green2)}
+.daily-todo-text{min-height:16px;padding:1px 3px;border-bottom:1px dashed #d1d5db;word-break:keep-all;overflow-wrap:anywhere;min-width:0}
+.daily-todo-text.done{text-decoration:line-through;color:#9ca3af}
+.daily-todo-delete{width:18px;height:18px;padding:0;border:1px solid #e5e7eb;border-radius:4px;background:#fff;color:#9ca3af;font-size:10px;line-height:16px}
+.daily-todo-delete:hover{color:#dc2626;border-color:#fecaca;background:#fff1f2}
+.daily-todo-empty{font-size:8.5px;color:var(--muted);padding:5px 2px}
+.section-title{display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:#fff;padding:7px 10px;border-radius:6px 6px 0 0;margin-top:8px}.section-title h2{font-size:12px;margin:0}.section-title span{font-size:9px;color:#d1d5db}.channel-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:center;padding:8px;background:#f8fafc;border:1px solid var(--line);border-top:0}.add-channel{display:flex;align-items:center;justify-content:center;position:relative;min-width:0;min-height:40px;padding:8px 12px 8px 22px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#374151;font-weight:800;white-space:nowrap;box-shadow:0 1px 1px rgba(15,23,42,.03);transition:border-color .15s ease,color .15s ease,background .15s ease,transform .15s ease}.add-channel::before{content:'';position:absolute;left:0;top:0;bottom:0;width:12px;border-radius:8px 0 0 8px;background:#9ca3af}.add-channel.blog::before{background:var(--naver)}.add-channel.insta::before{background:var(--insta)}.add-channel.blogspot::before{background:var(--blogspot)}.add-channel.youtube::before{background:var(--youtube)}.add-channel:hover{transform:translateY(-1px);background:#fff}.add-channel.blog:hover{border-color:var(--naver);color:#047857}.add-channel.insta:hover{border-color:var(--insta);color:#9d174d}.add-channel.blogspot:hover{border-color:var(--blogspot);color:#c2410c}.add-channel.youtube:hover{border-color:var(--youtube);color:#b91c1c}.channel-count{grid-column:1/-1;justify-self:end;margin-left:0;font-size:8px;color:var(--muted);white-space:nowrap}
+.channel-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+grid-auto-rows:max-content;
+align-content:start;
+align-items:start;
+gap:8px;
+margin-top:8px;
+height:142mm;
+min-height:142mm;
+max-height:142mm;
+flex:0 0 142mm;
+overflow-y:auto;
+overflow-x:hidden;
+padding-right:3px;
+scrollbar-width:thin
+}.channel-grid::-webkit-scrollbar{width:6px}.channel-grid::-webkit-scrollbar-thumb{background:#c7cdd4;border-radius:10px}.empty-channels{grid-column:1/-1;border:1px dashed #cbd5e1;border-radius:7px;padding:18px;text-align:center;color:#64748b;font-size:10px;background:#f8fafc}.channel{border:1px solid var(--line);border-radius:7px;overflow:hidden;align-self:start;height:max-content;min-height:max-content}.channel-head{display:flex;justify-content:space-between;align-items:center;padding:7px 9px;background:var(--soft);font-size:11px;font-weight:800}.channel-title{display:flex;align-items:center;gap:4px;min-width:0}.channel-prefix{white-space:nowrap;color:#4b5563}.channel-name{display:inline-block;min-width:95px;max-width:220px;padding:3px 7px;border:1px dashed #9ca3af;border-radius:5px;background:#fff;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}.channel-name:hover{border-color:var(--green2)}.channel-name:focus{border-style:solid;border-color:var(--green2);background:#fffbe6}.head-actions{display:flex;align-items:center;gap:5px}.type{font-size:8px;color:#fff;padding:3px 7px;border-radius:12px}.delete-channel{width:20px;height:20px;border-radius:50%;padding:0;background:#fff;border:1px solid #d1d5db;color:#6b7280;font-size:12px;line-height:18px}.delete-channel:hover{border-color:#dc2626;color:#dc2626;background:#fff1f2}.channel.naver{border-left:5px solid var(--naver)}.channel.naver .type{background:var(--naver)}.channel.insta{border-left:5px solid var(--insta)}.channel.insta .type{background:var(--insta)}.channel.blogspot{border-left:5px solid var(--blogspot)}.channel.blogspot .type{background:var(--blogspot)}.channel.youtube{border-left:5px solid var(--youtube)}.channel.youtube .type{background:var(--youtube)}.channel-body{padding:7px 9px;height:auto;min-height:0;overflow:visible}.task{display:grid;grid-template-columns:18px minmax(0,1fr) 54px 22px;gap:6px;align-items:start;border-bottom:1px dashed #e5e7eb;padding:7px 0;font-size:10px}.task input{width:14px;height:14px;accent-color:var(--green2);margin-top:2px}.task-text{min-height:18px;padding:2px 4px;line-height:1.45;white-space:normal;word-break:keep-all;overflow-wrap:anywhere}.status{border:1px solid var(--line);border-radius:4px;padding:3px;text-align:center;font-size:8px;color:var(--muted);align-self:start;white-space:nowrap}.delete-task{width:20px;height:20px;padding:0;border-radius:4px;background:#fff;color:#9ca3af;border:1px solid #e5e7eb}.delete-task:hover{color:#dc2626;border-color:#fecaca;background:#fff1f2}.task-add-row{display:flex;justify-content:flex-end;padding-top:6px}.add-task{background:#eef6e8;color:#3f6212;border:1px solid #cce3b7;padding:5px 8px;font-size:8px}
+
+@media(max-width:700px){.channel-toolbar{grid-template-columns:1fr}.task{grid-template-columns:18px minmax(0,1fr) 22px;grid-template-areas:'check text delete' '. status .';}.task input{grid-area:check}.task-text{grid-area:text}.status{grid-area:status;justify-self:start;margin-left:4px}.delete-task{grid-area:delete}}
+.schedule-wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:8px;margin-top:8px}.schedule,.pipeline{border:1px solid var(--line);border-radius:0 0 6px 6px;overflow:hidden}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:5px;font-size:9px}th:last-child,td:last-child{border-right:0}tr:last-child td{border-bottom:0}th{background:var(--soft);font-size:8px;color:var(--muted)}.time{width:50px;text-align:center;font-weight:700;color:var(--green2)}.check{width:30px;text-align:center}.pipeline td:first-child{font-weight:700;width:36%}.bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;flex:1;min-height:0}.box{border:1px solid var(--line);border-radius:7px;overflow:hidden;min-height:116px;display:flex;flex-direction:column}.box h3{margin:0;background:var(--yellow);padding:7px 9px;font-size:10px;flex:0 0 auto}.inner{padding:8px;font-size:10px;line-height:1.65;min-height:88px;flex:1;overflow:auto}.lined{background-image:linear-gradient(to bottom,transparent 21px,#eceff3 22px);background-size:100% 22px}.footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex:0 0 auto;padding-top:7px;border-top:1px solid var(--line);font-size:8px;color:var(--muted)}.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.channel-action-bar{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:8px;padding-top:7px;border-top:1px solid var(--line);flex:0 0 auto}
+.calendar-jump{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+.calendar-jump:hover{background:#ffedd5}button{border:0;border-radius:5px;padding:7px 10px;font-size:10px;font-weight:700;cursor:pointer}.print{background:var(--ink);color:#fff}.reset{background:#eef1f4;color:#374151}.sync{background:var(--green2);color:#fff}
+.month-head{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;border-bottom:3px solid var(--ink);padding-bottom:8px}
+.month-layout{display:grid;grid-template-columns:minmax(0,1fr) 58mm;gap:10mm;align-items:start}
+.month-main{min-width:0}
+.month-summary-panel{border:1px solid var(--line);border-radius:8px;background:#f8fafc;padding:10px;min-height:145mm}
+.month-summary-panel h2{margin:0 0 8px;font-size:13px;color:var(--ink)}
+.month-summary-panel p{margin:0 0 10px;font-size:8px;color:var(--muted);line-height:1.5}
+.month-summary-list{display:flex;flex-direction:column;gap:6px}
+.month-summary-item{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-left-width:5px;border-radius:6px;background:#fff;padding:7px 8px;font-size:9px;cursor:pointer;transition:opacity .16s ease,transform .16s ease,box-shadow .16s ease}
+.month-summary-item:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(15,23,42,.08)}
+.month-summary-item.active{outline:2px solid var(--ink);outline-offset:1px}
+.month-summary-item .summary-name{font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.month-summary-item .summary-count{font-weight:900;white-space:nowrap}
+.month-summary-overview{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.month-summary-overview h3{margin:0 0 7px;font-size:10px;color:var(--ink)}
+.month-summary-stat{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed #e5e7eb;font-size:8.5px}
+.month-summary-stat:last-child{border-bottom:0}
+.month-summary-stat b{font-size:9px}
+.calendar.filter-active .day{opacity:.28;transition:opacity .15s ease}
+.calendar.filter-active .day.filter-match{opacity:1}
+.calendar.filter-active .day.filter-match{background:#fffdf2}
+.calendar.filter-active .badge{opacity:.22}
+.calendar.filter-active .badge.filter-match{opacity:1;box-shadow:0 0 0 2px rgba(31,41,55,.12)}
+.calendar.filter-active .completion-stamp{opacity:.18}
+.calendar.filter-active .day.filter-match .completion-stamp{opacity:1}
+
+.month-summary-item.blog{border-left-color:var(--naver)}
+.month-summary-item.instagram{border-left-color:var(--insta)}
+.month-summary-item.blogspot{border-left-color:var(--blogspot)}
+.month-summary-item.youtube{border-left-color:var(--youtube)}
+.month-summary-empty{border:1px dashed #cbd5e1;border-radius:6px;padding:12px;text-align:center;color:var(--muted);font-size:9px;background:#fff}
+.todo-history-head{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end;border-bottom:3px solid var(--ink);padding-bottom:8px}
+.todo-history-head h1{margin:0;font-size:23px}.todo-history-head p{margin:4px 0 0;font-size:9px;color:var(--muted)}
+.todo-history-tools{display:flex;align-items:end;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.todo-history-field label{display:block;font-size:8px;color:var(--muted);font-weight:700;margin-bottom:3px}
+.todo-history-field select,.todo-history-field input{height:33px;border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:#fff;font-size:10px}
+.todo-history-field input{width:210px}
+.todo-history-clear{height:33px;background:#eef1f4;color:#374151;border:1px solid #d8dde4}
+.todo-history-status{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 6px;font-size:9px;color:var(--muted)}
+.todo-history-status b{color:var(--ink)}
+.todo-history-calendar{border:1px solid #9ca3af}
+.todo-history-weekdays,.todo-history-days{display:grid;grid-template-columns:repeat(7,1fr)}
+.todo-history-weekdays div{text-align:center;font-size:10px;font-weight:800;background:#f3f4f6;padding:6px 0;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.todo-history-weekdays div:last-child{border-right:0}
+.todo-history-day{height:25mm;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px;overflow:auto;background:#fff;scrollbar-width:thin}
+.todo-history-day:nth-child(7n){border-right:0}.todo-history-day.empty{background:#fafafa}
+.todo-history-day-num{font-size:10px;font-weight:900;margin-bottom:4px}
+.todo-history-day:nth-child(7n+1) .todo-history-day-num{color:#dc2626}
+.todo-history-day:nth-child(7n) .todo-history-day-num{color:#2563eb}
+.todo-history-items{display:flex;flex-direction:column;gap:3px}
+.todo-history-item{display:grid;grid-template-columns:minmax(0,1fr) 16px;gap:4px;align-items:start;font-size:7.5px;line-height:1.25;padding:4px 5px;border-radius:4px;background:#eef6e8;color:#365314;border-left:4px solid var(--green2);word-break:keep-all;overflow-wrap:anywhere}
+.todo-history-item-text{min-width:0}
+.todo-history-delete{width:16px;height:16px;padding:0;border:1px solid #d1d5db;border-radius:4px;background:#fff;color:#9ca3af;font-size:9px;line-height:14px}
+.todo-history-delete:hover{color:#dc2626;border-color:#fecaca;background:#fff1f2}
+.todo-history-item.match{background:#fff7ed;color:#9a3412;border-left-color:#f97316;font-weight:800}
+.todo-history-calendar.searching .todo-history-item:not(.match){opacity:.18}
+.todo-history-calendar.searching .todo-history-day:not(.has-match){opacity:.3}
+.todo-history-calendar.searching .todo-history-day.has-match{outline:2px solid #f59e0b;outline-offset:-2px;background:#fffbeb}
+.todo-history-empty{font-size:8px;color:#9ca3af}
+.todo-history-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:8px;color:var(--muted)}
+
+.month-head h1{margin:0;font-size:24px}.month-head p{margin:4px 0 0;font-size:10px;color:var(--muted)}.month-tools{display:flex;align-items:end;gap:10px}.select-wrap label{display:block;font-size:9px;color:var(--muted);font-weight:700;margin-bottom:4px}.select-wrap select{min-width:150px;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-weight:800;background:#fff}.legend{display:flex;gap:5px;flex-wrap:wrap;max-width:540px}.legend span,.badge{display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:800;border-radius:4px}.legend span{font-size:8px;padding:4px 6px}.legend-blog{background:var(--naver)}.legend-insta{background:var(--insta)}.legend-blogspot{background:var(--blogspot)}.legend-youtube{background:var(--youtube)}
+.month-title-large{text-align:center;font-size:20px;font-weight:900;margin:10px 0 7px}.calendar{border:1px solid #9ca3af}.weekdays,.days{display:grid;grid-template-columns:repeat(7,1fr)}.weekdays div{text-align:center;font-size:10px;font-weight:800;background:#f3f4f6;padding:6px 0;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.weekdays div:last-child{border-right:0}.sun{color:#dc2626}.sat{color:#2563eb}.day{height:25mm;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px;overflow:auto;position:relative;scrollbar-width:thin;overscroll-behavior:contain}.day::-webkit-scrollbar{width:6px}.day::-webkit-scrollbar-thumb{background:#c7cdd4;border-radius:10px}.day::-webkit-scrollbar-track{background:#f3f4f6}.day:nth-child(7n){border-right:0}.day.empty{background:#fafafa}.day-head{display:flex;align-items:center;justify-content:flex-start;gap:4px;margin-bottom:5px;position:relative;z-index:2}.day-num{font-size:11px;font-weight:900}.day-context-menu{position:fixed;z-index:9999;display:none;min-width:150px;padding:6px;background:#fff;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 10px 28px rgba(15,23,42,.22)}.day-context-menu.show{display:block}.day-context-menu button{width:100%;text-align:left;background:#fff;color:#374151;padding:8px 10px;border-radius:6px;font-size:10px}.day-context-menu button:hover{background:#fff1f2;color:#dc2626}.day-context-menu .menu-date{padding:4px 8px 7px;font-size:8px;color:#6b7280;border-bottom:1px solid #e5e7eb;margin-bottom:4px}.day:nth-child(7n+1) .day-num{color:#dc2626}.day:nth-child(7n) .day-num{color:#2563eb}.badges{display:flex;flex-direction:column;gap:3px;padding-right:1px}.completion-stamp{position:absolute;top:4px;right:5px;width:28px;height:28px;border:2px solid #dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#dc2626;background:rgba(255,255,255,.9);font-size:8px;font-weight:900;line-height:1;transform:rotate(-11deg);box-shadow:inset 0 0 0 2px rgba(220,38,38,.18);letter-spacing:-.5px;pointer-events:none}.completion-stamp::before{content:'완료'}.badge{justify-content:flex-start;width:100%;padding:3px 5px;font-size:7.5px;line-height:1.15;cursor:help}.badge.blog{background:var(--naver)}.badge.instagram{background:var(--insta)}.badge.blogspot{background:var(--blogspot)}.badge.youtube{background:var(--youtube)}.task-tooltip{position:fixed;z-index:10000;display:none;max-width:320px;padding:10px 12px;background:#111827;color:#fff;border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.25);font-size:11px;line-height:1.55;white-space:pre-wrap;pointer-events:none}.task-tooltip.show{display:block}.task-tooltip strong{display:block;margin-bottom:4px;color:#fde68a;font-size:11px}.today{outline:3px solid var(--green);outline-offset:-3px}.month-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:8px;color:var(--muted)}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1}
+
+/* ===== GitHub Pages / Mobile & Tablet Responsive UI ===== */
+.mobile-nav{display:none}
+@media screen and (max-width:1100px){
+  html{scroll-behavior:smooth}
+  body{
+    padding:12px;
+    padding-bottom:calc(76px + env(safe-area-inset-bottom));
+    background:#eef1f4;
+    overflow-x:hidden;
+  }
+  .page,.portrait,.landscape{
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-width:100%!important;
+  }
+  .page{
+    margin:0 auto 14px;
+    padding:22px!important;
+    overflow:visible!important;
+    border-radius:12px;
+    box-shadow:0 4px 18px rgba(15,23,42,.08);
+  }
+
+  .topbar{grid-template-columns:minmax(0,1fr) auto;gap:12px}
+  .title h1{font-size:24px}
+  .datebox{min-width:230px}
+
+  .summary{grid-template-columns:1.15fr 1fr 1fr}
+  .summary>.card,.daily-todo-card{
+    height:210px!important;
+    min-height:210px!important;
+    max-height:210px!important;
+  }
+
+  .channel-grid{
+    height:auto!important;
+    min-height:360px!important;
+    max-height:none!important;
+    flex:none!important;
+    overflow:visible!important;
+  }
+  .channel-head{gap:6px}
+  .channel-name{max-width:none;min-width:0;flex:1}
+  .channel-title{flex:1}
+  .task-text{font-size:13px}
+  .task{font-size:12px}
+
+  .schedule-wrap{grid-template-columns:1fr 1fr}
+  .bottom{grid-template-columns:1fr 1fr}
+  .month-layout{grid-template-columns:minmax(0,1fr);gap:16px}
+  .month-summary-panel{min-height:0}
+  .month-main{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .month-main .month-title-large{position:sticky;left:0}
+  .calendar{min-width:760px}
+  .month-head{grid-template-columns:1fr;gap:12px}
+  .month-tools{justify-content:flex-start;flex-wrap:wrap}
+  .legend{max-width:none}
+
+  .todo-history-head{grid-template-columns:1fr;gap:12px}
+  .todo-history-tools{justify-content:flex-start}
+  .todo-history-calendar{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .todo-history-weekdays,.todo-history-days{min-width:760px}
+
+  button,.add-channel,.field input,.select-wrap select,
+  .todo-history-field select,.todo-history-field input{
+    min-height:42px;
+  }
+  .delete-channel,.delete-task,.daily-todo-delete,.todo-history-delete{
+    min-height:0;
+  }
+
+  .mobile-nav{
+    position:fixed;
+    z-index:20000;
+    left:10px;
+    right:10px;
+    bottom:calc(10px + env(safe-area-inset-bottom));
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:5px;
+    padding:6px;
+    border:1px solid #d8dde4;
+    border-radius:14px;
+    background:rgba(255,255,255,.96);
+    box-shadow:0 10px 30px rgba(15,23,42,.18);
+    backdrop-filter:blur(10px);
+  }
+  .mobile-nav button{
+    min-width:0;
+    min-height:48px;
+    padding:5px 3px;
+    border-radius:10px;
+    background:#f6f8fa;
+    color:#374151;
+    font-size:11px;
+    line-height:1.2;
+  }
+  .mobile-nav button:active{background:#e5e7eb}
+}
+
+@media screen and (max-width:800px){
+  body{padding:8px;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .page{padding:14px!important;border-radius:10px}
+
+  .topbar{grid-template-columns:1fr;align-items:start}
+  .title h1{font-size:21px;letter-spacing:-.5px}
+  .title p{font-size:10px}
+  .datebox{width:100%;min-width:0;grid-template-columns:1.2fr .8fr}
+
+  .summary{grid-template-columns:1fr}
+  .summary>.card,.daily-todo-card{
+    height:180px!important;
+    min-height:180px!important;
+    max-height:180px!important;
+  }
+
+  .section-title{
+    align-items:flex-start;
+    gap:6px;
+    padding:9px 10px;
+  }
+  .section-title span{display:none}
+  .section-title h2{font-size:13px}
+
+  .channel-toolbar{grid-template-columns:1fr 1fr}
+  .add-channel{
+    min-height:46px;
+    padding-left:20px;
+    font-size:12px;
+  }
+  .channel-grid{
+    grid-template-columns:1fr!important;
+    min-height:240px!important;
+  }
+  .channel-head{padding:9px}
+  .channel-prefix{font-size:12px}
+  .channel-name{font-size:12px}
+  .type{font-size:8px}
+  .channel-body{padding:5px 9px 9px}
+
+  .task{
+    grid-template-columns:24px minmax(0,1fr) 50px 28px;
+    gap:5px;
+    padding:9px 0;
+    align-items:start;
+  }
+  .task input{width:18px;height:18px}
+  .task-text{font-size:13px;line-height:1.45}
+  .status{font-size:9px;padding:4px 3px}
+  .delete-task{width:26px;height:26px}
+  .add-task{min-height:38px;font-size:10px}
+
+  .channel-action-bar{
+    position:sticky;
+    bottom:70px;
+    z-index:20;
+    background:rgba(255,255,255,.96);
+    padding:8px 0;
+    margin-top:8px;
+  }
+  .channel-action-bar button{flex:1}
+
+  .schedule-wrap{grid-template-columns:1fr}
+  .bottom{grid-template-columns:1fr}
+  th,td{font-size:10px;padding:7px 4px}
+  .box{min-height:150px}
+  .inner{font-size:12px}
+
+  .footer,.month-foot,.todo-history-foot{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:8px;
+  }
+  .actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .actions button{width:100%}
+
+  .month-head h1{font-size:20px}
+  .month-tools{display:grid;grid-template-columns:1fr}
+  .select-wrap select{width:100%}
+  .month-summary-panel{padding:12px}
+  .calendar{min-width:720px}
+
+  .todo-history-tools{display:grid;grid-template-columns:1fr;width:100%}
+  .todo-history-field input,.todo-history-field select{width:100%}
+  .todo-history-clear{width:100%}
+  .todo-history-status{align-items:flex-start;flex-direction:column}
+}
+
+@media screen and (max-width:480px){
+  .page{padding:11px!important}
+  .channel-toolbar{grid-template-columns:1fr}
+  .summary>.card,.daily-todo-card{
+    height:165px!important;
+    min-height:165px!important;
+    max-height:165px!important;
+  }
+  .daily-todo-head{align-items:flex-start}
+  .daily-todo-head-actions{gap:3px}
+  .daily-todo-history-btn,.daily-todo-add{font-size:9px;padding:5px 6px}
+  .task{
+    grid-template-columns:22px minmax(0,1fr) 26px;
+    grid-template-areas:
+      "check text delete"
+      ". status .";
+  }
+  .task input{grid-area:check}
+  .task-text{grid-area:text}
+  .status{grid-area:status;justify-self:start}
+  .delete-task{grid-area:delete}
+  .head-actions{gap:3px}
+  .type{padding:3px 5px}
+  .channel-name{padding:4px 5px}
+  .mobile-nav button{font-size:10px}
+}
+
+@page todo{size:A4 portrait;margin:0}@page calendar{size:A4 landscape;margin:0}.portrait{page:todo}.landscape{page:calendar}@media print{html,body{background:#fff;padding:0}.page{margin:0;box-shadow:none}.actions,.channel-toolbar,.delete-channel,.delete-task,.task-add-row,.daily-todo-add,.daily-todo-delete,.daily-todo-history-btn,.todo-history-tools,.todo-history-delete{display:none!important}.toast,.task-tooltip,.day-context-menu,.mobile-nav{display:none!important}.portrait{width:210mm;height:297mm;min-height:297mm}.landscape{width:297mm;min-height:210mm}.channel-grid{max-height:78mm;overflow:hidden}}
+</style>
+</head>
+<body>
+<main class="page portrait daily-page" id="todoPage">
+<header class="topbar"><div class="title"><h1>DAILY CONTENT TO DO LIST</h1><p id="channelSummary">등록된 채널 없음</p></div><div class="datebox"><label class="field"><b>DATE</b><input id="workDate" type="date" min="2026-01-01" max="2026-12-31" value="2026-08-03"></label><div class="field"><b>DAY</b><span id="dayText"></span></div></div></header>
+<section class="summary"><div class="card"><h3>오늘의 핵심 목표 1개</h3><div class="write static-edit" contenteditable="true">가장 중요한 결과를 한 문장으로 적기</div></div><div class="card"><h3>TOP 3</h3><div class="write static-edit" contenteditable="true">1. <br>2. <br>3. </div></div><div class="card daily-todo-card"><div class="daily-todo-head"><h3>DAILY TO DO</h3><div class="daily-todo-head-actions"><button type="button" class="daily-todo-history-btn" onclick="goToDailyTodoHistory()">기록 검색</button><button type="button" class="daily-todo-add" id="dailyTodoAddBtn">＋ 항목 추가</button></div></div><div class="daily-todo-list" id="dailyTodoList"></div></div></section>
+<div class="section-title"><h2>채널별 오늘의 할 일</h2><span>1페이지 · 채널 추가 시 플랫폼별 기본 체크리스트 자동 생성 · 길어도 줄바꿈되어 표시</span></div>
+<div class="channel-toolbar"><button class="add-channel blog" type="button" id="addBlogBtn">＋ 네이버 블로그</button><button class="add-channel insta" type="button" id="addInstaBtn">＋ 인스타그램</button><button class="add-channel blogspot" type="button" id="addBlogspotBtn">＋ 구글 블로그스팟</button><button class="add-channel youtube" type="button" id="addYoutubeBtn">＋ YouTube</button><span class="channel-count" id="channelCount">0개 채널</span></div>
+<section class="channel-grid" id="channels"></section>
+<div class="channel-action-bar"><button class="calendar-jump" onclick="goToMonthlyCalendar()">월별 캘린더 바로 보기</button><button class="sync" onclick="syncToCalendar()">선택 날짜에 완료 기록</button></div>
+</main>
+<main class="page portrait daily-page" id="detailPage">
+<header class="topbar"><div class="title"><h1>DAILY CONTENT DETAIL PAGE</h1><p>시간대별 실행 계획 · 진행 현황 · 메모를 분리한 2페이지 구성</p></div><div class="datebox"><div class="field"><b>LINKED DATE</b><span id="linkedDateText"></span></div><div class="field"><b>PAGE</b><span>2 / 3</span></div></div></header>
+<section class="schedule-wrap"><div><div class="section-title" style="margin-top:0"><h2>시간대별 실행 계획</h2><span>현실적으로 배정</span></div><div class="schedule"><table><thead><tr><th class="time">시간</th><th>할 일</th><th style="width:80px">채널</th><th class="check">완료</th></tr></thead><tbody><tr><td class="time">06–09</td><td class="static-edit" contenteditable="true"></td><td class="static-edit" contenteditable="true"></td><td class="check"><input class="static-check" type="checkbox"></td></tr><tr><td class="time">09–12</td><td class="static-edit" contenteditable="true"></td><td class="static-edit" contenteditable="true"></td><td class="check"><input class="static-check" type="checkbox"></td></tr><tr><td class="time">12–15</td><td class="static-edit" contenteditable="true"></td><td class="static-edit" contenteditable="true"></td><td class="check"><input class="static-check" type="checkbox"></td></tr><tr><td class="time">15–18</td><td class="static-edit" contenteditable="true"></td><td class="static-edit" contenteditable="true"></td><td class="check"><input class="static-check" type="checkbox"></td></tr><tr><td class="time">18–21</td><td class="static-edit" contenteditable="true"></td><td class="static-edit" contenteditable="true"></td><td class="check"><input class="static-check" type="checkbox"></td></tr><tr><td class="time">21–24</td><td class="static-edit" contenteditable="true"></td><td class="static-edit" contenteditable="true"></td><td class="check"><input class="static-check" type="checkbox"></td></tr></tbody></table></div></div><div><div class="section-title" style="margin-top:0"><h2>콘텐츠 진행 현황</h2><span>오늘 기준</span></div><div class="pipeline"><table><tbody><tr><td>아이디어</td><td class="static-edit" contenteditable="true">__개</td></tr><tr><td>자료 조사</td><td class="static-edit" contenteditable="true">__개</td></tr><tr><td>초안 작성</td><td class="static-edit" contenteditable="true">__개</td></tr><tr><td>디자인</td><td class="static-edit" contenteditable="true">__개</td></tr><tr><td>검수 대기</td><td class="static-edit" contenteditable="true">__개</td></tr><tr><td>발행 완료</td><td class="static-edit" contenteditable="true">__개</td></tr></tbody></table></div></div></section>
+<section class="bottom"><div class="box"><h3>메모 · 아이디어 · 갑자기 떠오른 주제</h3><div class="inner lined static-edit" contenteditable="true"></div></div><div class="box"><h3>오늘 마감 & 내일로 넘길 일</h3><div class="inner lined static-edit" contenteditable="true">□ 오늘 꼭 마감할 일<br>□ 내일 가장 먼저 시작할 일<br>□ 보류·위임할 일</div></div></section>
+<footer class="footer"><span>완료 기록은 1페이지 채널별 오늘의 할 일 아래 버튼에서 저장할 수 있습니다.</span><div class="actions"><button class="calendar-jump" onclick="goToMonthlyCalendar()">월별 캘린더 바로 보기</button><button class="reset" onclick="resetDaily()">일일표 초기화</button><button class="print" onclick="window.print()">A4 인쇄 / PDF 저장</button></div></footer>
+</main>
+<main class="page landscape" id="calendarPage">
+<header class="month-head"><div><h1>2026 MONTHLY CONTENT COMPLETION CALENDAR</h1><p>목록에서 월을 선택하면 해당 월만 가로형 A4 한 페이지에 표시됩니다.</p></div><div class="month-tools"><div class="select-wrap"><label>표시할 월</label><select id="monthSelect"></select></div><div class="legend" id="legend"></div></div></header>
+<div class="month-layout"><div class="month-main"><div class="month-title-large" id="monthTitle"></div><section class="calendar"><div class="weekdays"><div class="sun">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="sat">토</div></div><div class="days" id="calendarDays"></div></section></div><aside class="month-summary-panel"><h2>이번 달 완료 횟수</h2><p>항목을 클릭하면 좌측 달력에서 해당 기록만 강조됩니다. 같은 항목을 다시 클릭하면 전체 보기로 돌아옵니다.</p><div class="month-summary-list" id="monthSummaryList"></div><div class="month-summary-overview" id="monthSummaryOverview"></div></aside></div>
+<footer class="month-foot"><span>각 날짜 아래에 완료된 콘텐츠 채널이 표시됩니다.</span><div class="actions"><button class="calendar-jump" onclick="goToChannelTasks()">채널별 오늘의 할 일로 바로 가기</button><button class="reset" onclick="resetCalendar()">완료 기록 초기화</button><button class="print" onclick="window.print()">가로형 A4 인쇄 / PDF 저장</button></div></footer>
+</main>
+<main class="page landscape" id="dailyTodoHistoryPage">
+<header class="todo-history-head">
+  <div><h1>DAILY TO DO COMPLETION ARCHIVE</h1><p>완료한 DAILY TO DO를 날짜별로 모아보고, 필요한 기록을 키워드로 검색할 수 있습니다.</p></div>
+  <div class="todo-history-tools">
+    <div class="todo-history-field"><label>표시할 월</label><select id="dailyTodoHistoryMonth"></select></div>
+    <div class="todo-history-field"><label>기록 검색</label><input id="dailyTodoHistorySearch" type="search" placeholder="예: 운동, 병원, 아이디어, 전화"></div>
+    <button type="button" class="todo-history-clear" id="dailyTodoHistoryClear">검색 초기화</button>
+  </div>
+</header>
+<div class="todo-history-status"><span id="dailyTodoHistorySummary">완료 기록을 불러오는 중...</span><span id="dailyTodoHistorySearchResult"></span></div>
+<section class="todo-history-calendar" id="dailyTodoHistoryCalendar">
+  <div class="todo-history-weekdays"><div class="sun">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="sat">토</div></div>
+  <div class="todo-history-days" id="dailyTodoHistoryDays"></div>
+</section>
+<footer class="todo-history-foot"><span>체크하면 해당 날짜에 완료 기록이 저장되고 체크는 즉시 해제됩니다. 기록은 여기서 ×로 삭제하기 전까지 유지됩니다.</span><div class="actions"><button class="calendar-jump" onclick="document.getElementById('todoPage').scrollIntoView({behavior:'smooth',block:'start'})">오늘 할 일로 돌아가기</button><button class="print" onclick="window.print()">A4 인쇄 / PDF 저장</button></div></footer>
+</main>
+<nav class="mobile-nav" aria-label="빠른 이동">
+<button type="button" onclick="document.getElementById('todoPage').scrollIntoView({behavior:'smooth',block:'start'})">오늘 할 일</button>
+<button type="button" onclick="document.getElementById('detailPage').scrollIntoView({behavior:'smooth',block:'start'})">실행 계획</button>
+<button type="button" onclick="goToMonthlyCalendar()">월간 달력</button>
+<button type="button" onclick="goToDailyTodoHistory()">TO DO 기록</button>
+</nav>
+<div class="toast" id="toast"></div><div class="task-tooltip" id="taskTooltip" role="tooltip"></div><div class="day-context-menu" id="dayContextMenu" role="menu" aria-hidden="true"><div class="menu-date" id="contextMenuDate"></div><button type="button" id="contextResetBtn">이 날짜 완료 기록 리셋</button></div>
+<script>
+const DAILY_KEY='daily-content-todo-v8-dynamic',CHANNEL_KEY='content-channels-v8-dynamic',CAL_KEY='content-completion-calendar-2026-v3-dynamic',MONTH_KEY='content-calendar-selected-month',DAILY_TODO_KEY='daily-todo-checklist-v1',DAILY_TODO_HISTORY_KEY='daily-todo-completion-history-v1',DAILY_TODO_LAST_DATE_KEY='daily-todo-last-date-v1';
+const todoPage=document.getElementById('todoPage'),detailPage=document.getElementById('detailPage'),workDate=document.getElementById('workDate'),dayText=document.getElementById('dayText'),channelsEl=document.getElementById('channels');
+let channels=[];
+const uid=(p='id')=>p+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+function getLocalToday(){
+  const now=new Date();
+  const y=now.getFullYear();
+  const m=String(now.getMonth()+1).padStart(2,'0');
+  const d=String(now.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+function setOpeningDateToToday(){
+  workDate.value=getLocalToday();
+  updateDay();
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600)}
+function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+let dailyTodoItems=[];
+function saveDailyTodo(){localStorage.setItem(DAILY_TODO_KEY,JSON.stringify(dailyTodoItems))}
+function getDailyTodoHistory(){
+  try{
+    const h=JSON.parse(localStorage.getItem(DAILY_TODO_HISTORY_KEY)||'{}');
+    return h&&typeof h==='object'&&!Array.isArray(h)?h:{};
+  }catch(e){return{}}
+}
+function saveDailyTodoHistory(history){localStorage.setItem(DAILY_TODO_HISTORY_KEY,JSON.stringify(history))}
+function addDailyTodoHistoryRecord(item){
+  const date=workDate.value||getLocalToday();
+  const text=(item.text||'').trim();
+  if(!date||!text)return;
+  const history=getDailyTodoHistory();
+  const arr=Array.isArray(history[date])?history[date]:[];
+  arr.push({
+    id:uid('history'),
+    sourceItemId:item.id,
+    text,
+    completedAt:new Date().toISOString()
+  });
+  history[date]=arr;
+  saveDailyTodoHistory(history);
+  renderDailyTodoHistory();
+}
+function deleteDailyTodoHistoryRecord(date,recordId){
+  const history=getDailyTodoHistory();
+  const arr=Array.isArray(history[date])?history[date]:[];
+  const target=arr.find(x=>x.id===recordId);
+  if(!target)return;
+  if(!confirm(`“${target.text||'완료 항목'}” 완료 기록을 ${date}에서 삭제할까요?`))return;
+  const next=arr.filter(x=>x.id!==recordId);
+  if(next.length)history[date]=next;else delete history[date];
+  saveDailyTodoHistory(history);
+  renderDailyTodoHistory();
+  toast('DAILY TO DO 완료 기록을 삭제했습니다.');
+}
+function loadDailyTodo(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(DAILY_TODO_KEY)||'null');
+    if(Array.isArray(saved)){
+      dailyTodoItems=saved.map(item=>({id:item.id||uid('dtodo'),text:String(item.text||''),checked:!!item.checked}));
+    }else{
+      dailyTodoItems=[{id:uid('dtodo'),text:'',checked:false},{id:uid('dtodo'),text:'',checked:false},{id:uid('dtodo'),text:'',checked:false}];
+    }
+  }catch(e){dailyTodoItems=[]}
+}
+function renderDailyTodo(){
+  const list=document.getElementById('dailyTodoList');if(!list)return;
+  list.innerHTML='';
+  if(!dailyTodoItems.length){list.innerHTML='<div class="daily-todo-empty">＋ 항목 추가를 눌러 오늘 할 일을 입력하세요.</div>';return}
+  dailyTodoItems.forEach(item=>{
+    const row=document.createElement('div');row.className='daily-todo-row';
+    row.innerHTML=`<input type="checkbox" class="daily-todo-check" ${item.checked?'checked':''}><div class="daily-todo-text ${item.checked?'done':''}" contenteditable="true" spellcheck="false">${escapeHtml(item.text)}</div><button type="button" class="daily-todo-delete" title="항목 삭제" aria-label="항목 삭제">×</button>`;
+    const check=row.querySelector('.daily-todo-check'),text=row.querySelector('.daily-todo-text');
+    check.addEventListener('change',()=>{if(check.checked){addDailyTodoHistoryRecord(item);item.checked=false;check.checked=false;text.classList.remove('done');saveDailyTodo();toast('오늘 날짜에 완료 기록을 저장했습니다.');}else{item.checked=false;saveDailyTodo();}});
+    text.addEventListener('input',()=>{item.text=(text.innerText||'').trim();saveDailyTodo()});
+    row.querySelector('.daily-todo-delete').addEventListener('click',()=>{
+      if(!confirm('이 DAILY TO DO 항목을 삭제할까요?'))return;
+      dailyTodoItems=dailyTodoItems.filter(x=>x.id!==item.id);saveDailyTodo();renderDailyTodo()
+    });
+    list.appendChild(row);
+  });
+}
+function addDailyTodo(){dailyTodoItems.push({id:uid('dtodo'),text:'새 할 일 입력',checked:false});saveDailyTodo();renderDailyTodo()}
+function resetDailyTodoChecks(){dailyTodoItems.forEach(item=>item.checked=false);saveDailyTodo();renderDailyTodo()}
+function prepareDailyTodoForOpeningDate(){
+  const today=getLocalToday();
+  const lastDate=localStorage.getItem(DAILY_TODO_LAST_DATE_KEY);
+  if(lastDate&&lastDate!==today){
+    dailyTodoItems.forEach(item=>item.checked=false);
+    saveDailyTodo();
+  }
+  localStorage.setItem(DAILY_TODO_LAST_DATE_KEY,today);
+}
+function goToDailyTodoHistory(){
+  const page=document.getElementById('dailyTodoHistoryPage');
+  if(page)page.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function setupDailyTodoHistoryMonths(){
+  const s=document.getElementById('dailyTodoHistoryMonth');if(!s)return;
+  s.innerHTML='';
+  for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=String(m);o.textContent=`${m}월`;s.appendChild(o)}
+  s.value=String(Number((workDate.value||getLocalToday()).slice(5,7)));
+  s.addEventListener('change',renderDailyTodoHistory);
+}
+function renderDailyTodoHistory(){
+  const days=document.getElementById('dailyTodoHistoryDays');
+  const monthSel=document.getElementById('dailyTodoHistoryMonth');
+  const search=document.getElementById('dailyTodoHistorySearch');
+  if(!days||!monthSel)return;
+  const m=Number(monthSel.value||1), history=getDailyTodoHistory();
+  const q=(search?.value||'').trim().toLowerCase();
+  const first=new Date(2026,m-1,1).getDay(),last=new Date(2026,m,0).getDate();
+  days.innerHTML='';
+  let monthTotal=0,matchTotal=0,activeDays=0;
+  for(let i=0;i<first;i++){const e=document.createElement('div');e.className='todo-history-day empty';days.appendChild(e)}
+  for(let d=1;d<=last;d++){
+    const date=`2026-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const items=(Array.isArray(history[date])?history[date]:[]).map((item,idx)=>{if(!item.id){item.id=`legacy-${date}-${idx}`;}return item;});
+    if(items.length)activeDays++;
+    monthTotal+=items.length;
+    const cell=document.createElement('div');cell.className='todo-history-day';
+    cell.innerHTML=`<div class="todo-history-day-num">${d}</div><div class="todo-history-items"></div>`;
+    const wrap=cell.querySelector('.todo-history-items');
+    items.forEach(item=>{
+      const isMatch=!q||(item.text||'').toLowerCase().includes(q);
+      if(q&&isMatch){matchTotal++;cell.classList.add('has-match')}
+      const el=document.createElement('div');
+      el.className='todo-history-item'+(q&&isMatch?' match':'');
+      el.title=`${date} · ${item.text||''}`;
+      el.innerHTML=`<span class="todo-history-item-text">✓ ${escapeHtml(item.text||'완료 항목')}</span><button type="button" class="todo-history-delete" title="완료 기록 삭제" aria-label="완료 기록 삭제">×</button>`;
+      el.querySelector('.todo-history-delete').addEventListener('click',e=>{e.stopPropagation();deleteDailyTodoHistoryRecord(date,item.id)});
+      wrap.appendChild(el);
+    });
+    if(!items.length)wrap.innerHTML='<div class="todo-history-empty"></div>';
+    days.appendChild(cell);
+  }
+  const total=first+last,rows=Math.ceil(total/7);
+  for(let i=total;i<rows*7;i++){const e=document.createElement('div');e.className='todo-history-day empty';days.appendChild(e)}
+  const cal=document.getElementById('dailyTodoHistoryCalendar');
+  if(cal)cal.classList.toggle('searching',!!q);
+  const sum=document.getElementById('dailyTodoHistorySummary');
+  const result=document.getElementById('dailyTodoHistorySearchResult');
+  if(sum)sum.innerHTML=`2026년 ${m}월 · 완료 <b>${monthTotal}건</b> · 기록일 <b>${activeDays}일</b>`;
+  if(result)result.innerHTML=q?`“${escapeHtml(search.value)}” 검색 결과 <b>${matchTotal}건</b>`:'';
+}
+function updateDay(){if(!workDate.value)return;const d=new Date(workDate.value+'T00:00:00');const label=['일요일','월요일','화요일','수요일','목요일','금요일','토요일'][d.getDay()];dayText.textContent=label;const linked=document.getElementById('linkedDateText');if(linked)linked.textContent=`${workDate.value} · ${label}`;}
+function defaultTasks(type){
+  const presets={
+    blog:[
+      '주제·핵심 키워드 선정',
+      '자료 조사 및 출처 확인',
+      '게시물 초안 작성',
+      '대표 이미지·본문 이미지 준비',
+      '제목·첫 문단·SEO·해시태그 검수',
+      '최종 검수 후 발행'
+    ],
+    instagram:[
+      '주제·후킹 문구 선정',
+      '카드뉴스·릴스 콘텐츠 제작',
+      '이미지·텍스트 최종 검수',
+      '게시물·릴스 캡션 작성',
+      '첫 댓글·해시태그 준비',
+      '업로드 및 댓글 확인'
+    ],
+    blogspot:[
+      '주제·검색 키워드 선정',
+      '자료 조사 및 출처 확인',
+      '블로그스팟용 HTML 본문 작성',
+      '썸네일·본문 이미지 준비',
+      '제목·메타 설명·SEO 최종 검수',
+      '발행 후 링크·모바일 화면 확인'
+    ],
+    youtube:[
+      '영상 주제·핵심 메시지 선정',
+      '대본·촬영 구성 작성',
+      '영상 촬영',
+      '영상 편집·자막 작업',
+      '썸네일 제작',
+      '제목·설명·태그 작성',
+      '최종 검수 후 업로드'
+    ]
+  };
+  return presets[type]||['체크리스트 입력'];
+}
+function addChannel(type){
+  const tasks=defaultTasks(type).map(text=>({id:uid('task'),text,checked:false}));
+  channels.push({id:uid(type),type,name:'채널명 입력',tasks});
+  saveChannels();renderChannels();renderLegend();renderMonth();
+  const msg={
+    blog:'네이버 블로그 기본 체크리스트를 추가했습니다.',
+    instagram:'인스타그램 기본 체크리스트를 추가했습니다.',
+    blogspot:'구글 블로그스팟 기본 체크리스트를 추가했습니다.',
+    youtube:'YouTube 기본 체크리스트를 추가했습니다.'
+  };
+  toast(msg[type]||'채널을 추가했습니다.');
+}
+function removeChannel(id){const ch=channels.find(c=>c.id===id);if(!ch)return;if(!confirm(`“${ch.name||'채널명 입력'}” 채널을 삭제할까요?`))return;channels=channels.filter(c=>c.id!==id);saveChannels();renderChannels();renderLegend();renderMonth();toast('채널을 삭제했습니다.')}
+function addTask(channelId){const ch=channels.find(c=>c.id===channelId);if(!ch)return;ch.tasks.push({id:uid('task'),text:'체크리스트 입력',checked:false});saveChannels();renderChannels()}
+function removeTask(channelId,taskId){const ch=channels.find(c=>c.id===channelId);if(!ch)return;if(!confirm('이 체크리스트 항목을 삭제할까요?'))return;ch.tasks=ch.tasks.filter(t=>t.id!==taskId);saveChannels();renderChannels()}
+function saveChannels(){localStorage.setItem(CHANNEL_KEY,JSON.stringify(channels));syncSummary()}
+function loadChannels(){try{const stored=JSON.parse(localStorage.getItem(CHANNEL_KEY)||'[]');channels=Array.isArray(stored)?stored:[]}catch(e){channels=[]}}
+function syncSummary(){const names=channels.map(c=>(c.name||'').trim()||'채널명 입력');document.getElementById('channelSummary').textContent=names.length?names.join(' · '):'등록된 채널 없음';document.getElementById('channelCount').textContent=`${channels.length}개 채널`}
+function updateChannelStatus(chEl,ch){const n=ch.tasks.filter(t=>t.checked).length,total=ch.tasks.length;chEl.querySelectorAll('.status').forEach(s=>{s.textContent=total&&n===total?'완료':n?`${n}/${total}`:'대기';s.style.color=total&&n===total?'#166534':'';s.style.fontWeight=total&&n===total?'800':''})}
+function renderChannels(){channelsEl.innerHTML='';if(!channels.length){channelsEl.innerHTML='<div class="empty-channels">위의 버튼을 눌러 네이버 블로그, 인스타그램, 구글 블로그스팟 또는 YouTube 채널을 추가하세요.</div>';syncSummary();return}channels.forEach(ch=>{const article=document.createElement('article');
+const typeMeta={
+  blog:{cls:'naver',prefix:'네이버 블로그',label:'BLOG'},
+  instagram:{cls:'insta',prefix:'인스타그램',label:'INSTAGRAM'},
+  blogspot:{cls:'blogspot',prefix:'구글 블로그스팟',label:'BLOGSPOT'},
+  youtube:{cls:'youtube',prefix:'YouTube',label:'YOUTUBE'}
+};
+const meta=typeMeta[ch.type]||typeMeta.blog;
+article.className=`channel ${meta.cls}`;article.dataset.channel=ch.id;
+const prefix=meta.prefix,typeLabel=meta.label;
+article.innerHTML=`<div class="channel-head"><div class="channel-title"><span class="channel-prefix">${prefix} ·</span><span class="channel-name" contenteditable="true" spellcheck="false">${escapeHtml(ch.name||'채널명 입력')}</span></div><div class="head-actions"><span class="type">${typeLabel}</span><button class="delete-channel" type="button" title="채널 삭제" aria-label="채널 삭제">×</button></div></div><div class="channel-body"><div class="tasks"></div><div class="task-add-row"><button class="add-task" type="button">＋ 체크리스트 추가</button></div></div>`;
+const nameEl=article.querySelector('.channel-name');nameEl.addEventListener('input',()=>{ch.name=(nameEl.innerText||'').trim();saveChannels();renderLegend();renderMonth()});article.querySelector('.delete-channel').addEventListener('click',()=>removeChannel(ch.id));article.querySelector('.add-task').addEventListener('click',()=>addTask(ch.id));const tasksEl=article.querySelector('.tasks');
+ch.tasks.forEach(task=>{const row=document.createElement('div');row.className='task';row.innerHTML=`<input type="checkbox" ${task.checked?'checked':''}><div class="task-text" contenteditable="true" spellcheck="false">${escapeHtml(task.text)}</div><div class="status">대기</div><button type="button" class="delete-task" title="항목 삭제" aria-label="항목 삭제">×</button>`;const cb=row.querySelector('input');const textEl=row.querySelector('.task-text');cb.addEventListener('change',()=>{task.checked=cb.checked;saveChannels();updateChannelStatus(article,ch)});textEl.addEventListener('input',()=>{task.text=(textEl.innerText||'').trim();saveChannels()});row.querySelector('.delete-task').addEventListener('click',()=>removeTask(ch.id,task.id));tasksEl.appendChild(row)});updateChannelStatus(article,ch);channelsEl.appendChild(article)});syncSummary()}
+function renderLegend(){const legend=document.getElementById('legend');legend.innerHTML='';channels.forEach(ch=>{const s=document.createElement('span');const cls={blog:'legend-blog',instagram:'legend-insta',blogspot:'legend-blogspot',youtube:'legend-youtube'};s.className=cls[ch.type]||'legend-blog';s.textContent=(ch.name||'').trim()||'채널명 입력';legend.appendChild(s)})}
+function saveDailyStatic(){const edits=[...document.querySelectorAll('.daily-page .static-edit')].map(e=>e.innerHTML),checks=[...document.querySelectorAll('.daily-page .static-check')].map(e=>e.checked);localStorage.setItem(DAILY_KEY,JSON.stringify({date:workDate.value,edits,checks}))}
+function loadDailyStatic(){try{const d=JSON.parse(localStorage.getItem(DAILY_KEY)||'null');if(d){if(d.date)workDate.value=d.date;[...document.querySelectorAll('.daily-page .static-edit')].forEach((e,i)=>{if(d.edits?.[i]!==undefined)e.innerHTML=d.edits[i]});[...document.querySelectorAll('.daily-page .static-check')].forEach((e,i)=>e.checked=!!d.checks?.[i])}}catch(e){}}
+function getCompletion(){return channels.filter(ch=>ch.tasks.length&&ch.tasks.every(t=>t.checked)).map(ch=>({key:ch.id,type:ch.type,name:(ch.name||'').trim()||'채널명 입력',tasks:ch.tasks.filter(t=>t.checked).map(t=>t.text).filter(Boolean)}))}
+function syncToCalendar(){
+  const date=workDate.value;
+  if(!date.startsWith('2026-'))return alert('2026년 날짜를 선택해 주세요.');
+  const done=getCompletion();
+  const today=getLocalToday();
+
+  if(done.length && date<today){
+    const ok=confirm(
+      `선택한 날짜 ${date}는 오늘(${today})보다 지난 날짜입니다.\n\n`+
+      `과거 날짜에 완료 기록을 저장하려고 합니다. 날짜가 맞는지 한 번 더 확인해 주세요.\n\n`+
+      `그래도 ${date}에 완료 기록을 저장할까요?`
+    );
+    if(!ok){
+      toast('과거 날짜 완료 기록 저장을 취소했습니다.');
+      return;
+    }
+  }
+
+  const cal=JSON.parse(localStorage.getItem(CAL_KEY)||'{}');
+  done.length?cal[date]=done:delete cal[date];
+  localStorage.setItem(CAL_KEY,JSON.stringify(cal));
+  document.getElementById('monthSelect').value=String(Number(date.slice(5,7)));
+  localStorage.setItem(MONTH_KEY,String(Number(date.slice(5,7))));
+  renderMonth();
+  toast(done.length?`${date} 완료 기록 저장`:`${date} 기록 삭제`);
+}
+function setupMonths(){const s=document.getElementById('monthSelect');for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.textContent=`${m}월`;s.appendChild(o)}const stored=Number(localStorage.getItem(MONTH_KEY)),fromDate=Number(workDate.value.slice(5,7));s.value=stored||fromDate||1;s.addEventListener('change',()=>{activeMonthFilterKey='';localStorage.setItem(MONTH_KEY,s.value);renderMonth()})}
+function normalizeCompleted(raw){if(!Array.isArray(raw))return[];return raw.map(item=>typeof item==='string'?{key:item,type:'blog',name:item,tasks:[]}:{key:item.key,type:item.type||'blog',name:item.name||item.key||'완료 채널',tasks:Array.isArray(item.tasks)?item.tasks:[]}).filter(item=>item.key)}
+function showTaskTooltip(event,title,tasks){const tip=document.getElementById('taskTooltip');const detail=tasks.length?tasks.map((t,i)=>`${i+1}. ${t}`).join('\n'):'저장된 세부 메모가 없습니다.';tip.innerHTML=`<strong>${escapeHtml(title)}</strong>${escapeHtml(detail).replace(/\n/g,'<br>')}`;tip.classList.add('show');moveTaskTooltip(event)}
+function moveTaskTooltip(event){const tip=document.getElementById('taskTooltip');if(!tip.classList.contains('show'))return;const pad=12;let x=event.clientX+14,y=event.clientY+14;const w=tip.offsetWidth,h=tip.offsetHeight;if(x+w+pad>window.innerWidth)x=event.clientX-w-14;if(y+h+pad>window.innerHeight)y=event.clientY-h-14;tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px'}
+function hideTaskTooltip(){document.getElementById('taskTooltip').classList.remove('show')}
+
+let activeMonthFilterKey='';
+
+function applyMonthFilter(key){
+  activeMonthFilterKey = activeMonthFilterKey===key ? '' : key;
+  const calEl=document.querySelector('#calendarPage .calendar');
+  if(!calEl)return;
+  const allDays=[...calEl.querySelectorAll('.day')];
+  const allBadges=[...calEl.querySelectorAll('.badge')];
+
+  allDays.forEach(d=>d.classList.remove('filter-match'));
+  allBadges.forEach(b=>b.classList.remove('filter-match'));
+
+  if(!activeMonthFilterKey){
+    calEl.classList.remove('filter-active');
+  }else{
+    calEl.classList.add('filter-active');
+    allBadges.forEach(b=>{
+      if(b.dataset.channelKey===activeMonthFilterKey){
+        b.classList.add('filter-match');
+        const day=b.closest('.day');
+        if(day)day.classList.add('filter-match');
+      }
+    });
+  }
+
+  document.querySelectorAll('.month-summary-item').forEach(row=>{
+    row.classList.toggle('active', row.dataset.key===activeMonthFilterKey);
+  });
+}
+
+function renderMonthSummary(m){
+  const list=document.getElementById('monthSummaryList');
+  const overview=document.getElementById('monthSummaryOverview');
+  if(!list||!overview)return;
+
+  const cal=JSON.parse(localStorage.getItem(CAL_KEY)||'{}');
+  const counts={};
+  let totalCompleted=0;
+  const activeDates=new Set();
+
+  Object.entries(cal).forEach(([date,raw])=>{
+    if(!date.startsWith(`2026-${String(m).padStart(2,'0')}-`))return;
+    const items=normalizeCompleted(raw);
+    if(items.length)activeDates.add(date);
+    items.forEach(item=>{
+      const key=item.key||`${item.type}:${item.name}`;
+      if(!counts[key])counts[key]={key,name:item.name||'완료 채널',type:item.type||'blog',count:0};
+      counts[key].count+=1;
+      totalCompleted+=1;
+    });
+  });
+
+  const items=Object.values(counts).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'ko'));
+  list.innerHTML='';
+
+  if(!items.length){
+    list.innerHTML='<div class="month-summary-empty">이 달에 저장된 완료 기록이 없습니다.</div>';
+    overview.innerHTML='<h3>월간 요약</h3><div class="month-summary-stat"><span>총 완료 콘텐츠</span><b>0건</b></div><div class="month-summary-stat"><span>완료 기록일</span><b>0일</b></div>';
+    activeMonthFilterKey='';
+    return;
+  }
+
+  items.forEach(item=>{
+    const row=document.createElement('div');
+    row.className=`month-summary-item ${['instagram','blogspot','youtube'].includes(item.type)?item.type:'blog'}`;
+    row.dataset.key=item.key;
+    row.title=`${item.name} 기록만 보기`;
+    row.innerHTML=`<span class="summary-name">${escapeHtml(item.name)}</span><span class="summary-count">${item.count}회</span>`;
+    row.addEventListener('click',()=>applyMonthFilter(item.key));
+    list.appendChild(row);
+  });
+
+  const top=items[0];
+  const avg=activeDates.size ? (totalCompleted/activeDates.size).toFixed(1) : '0.0';
+  overview.innerHTML=`
+    <h3>월간 요약</h3>
+    <div class="month-summary-stat"><span>총 완료 콘텐츠</span><b>${totalCompleted}건</b></div>
+    <div class="month-summary-stat"><span>완료 기록일</span><b>${activeDates.size}일</b></div>
+    <div class="month-summary-stat"><span>가장 많이 완료한 채널</span><b>${escapeHtml(top.name)} · ${top.count}회</b></div>
+    <div class="month-summary-stat"><span>완료일 평균</span><b>${avg}건/일</b></div>
+  `;
+
+  if(activeMonthFilterKey && !items.some(item=>item.key===activeMonthFilterKey)){
+    activeMonthFilterKey='';
+  }
+  if(activeMonthFilterKey)applyMonthFilter(activeMonthFilterKey);
+}
+function renderMonth(){const m=Number(document.getElementById('monthSelect').value);document.getElementById('monthTitle').textContent=`2026년 ${m}월`;const wrap=document.getElementById('calendarDays');wrap.innerHTML='';const first=new Date(2026,m-1,1).getDay(),last=new Date(2026,m,0).getDate(),cal=JSON.parse(localStorage.getItem(CAL_KEY)||'{}');for(let i=0;i<first;i++){const e=document.createElement('div');e.className='day empty';wrap.appendChild(e)}for(let d=1;d<=last;d++){const date=`2026-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`,cell=document.createElement('div');cell.className='day'+(date===workDate.value?' today':'');cell.innerHTML=`<div class="day-head"><div class="day-num">${d}</div></div><div class="badges"></div>`;cell.dataset.date=date;cell.addEventListener('contextmenu',e=>{e.preventDefault();hideTaskTooltip();showDayContextMenu(e,date)});const badges=cell.querySelector('.badges'),completed=normalizeCompleted(cal[date]);completed.forEach(item=>{const b=document.createElement('div');const itemKey=item.key||`${item.type}:${item.name}`;b.className=`badge ${['instagram','blogspot','youtube'].includes(item.type)?item.type:'blog'}`;b.dataset.channelKey=itemKey;b.textContent='✓ '+item.name;b.addEventListener('mouseenter',e=>showTaskTooltip(e,item.name,item.tasks));b.addEventListener('mousemove',moveTaskTooltip);b.addEventListener('mouseleave',hideTaskTooltip);badges.appendChild(b)});if(completed.length>=2){const stamp=document.createElement('div');stamp.className='completion-stamp';stamp.setAttribute('aria-label','하루 2개 이상 완료');cell.appendChild(stamp)}wrap.appendChild(cell)}const total=first+last,rows=Math.ceil(total/7);for(let i=total;i<rows*7;i++){const e=document.createElement('div');e.className='day empty';wrap.appendChild(e)}renderMonthSummary(m)}
+let contextMenuDate='';function hideDayContextMenu(){const menu=document.getElementById('dayContextMenu');menu.classList.remove('show');menu.setAttribute('aria-hidden','true')}function showDayContextMenu(event,date){contextMenuDate=date;const menu=document.getElementById('dayContextMenu'),label=document.getElementById('contextMenuDate');label.textContent=`${date} 완료 기록 관리`;menu.classList.add('show');menu.setAttribute('aria-hidden','false');const pad=8,mw=menu.offsetWidth||150,mh=menu.offsetHeight||76;let x=event.clientX,y=event.clientY;if(x+mw+pad>window.innerWidth)x=window.innerWidth-mw-pad;if(y+mh+pad>window.innerHeight)y=window.innerHeight-mh-pad;menu.style.left=Math.max(pad,x)+'px';menu.style.top=Math.max(pad,y)+'px'}
+document.getElementById('contextResetBtn').addEventListener('click',()=>{const date=contextMenuDate;hideDayContextMenu();if(date)resetDateRecord(date)});document.addEventListener('click',e=>{if(!e.target.closest('#dayContextMenu'))hideDayContextMenu()});document.addEventListener('keydown',e=>{if(e.key==='Escape')hideDayContextMenu()});window.addEventListener('scroll',()=>{hideDayContextMenu();hideTaskTooltip()},true);window.addEventListener('resize',()=>{hideDayContextMenu();hideTaskTooltip()});
+function goToMonthlyCalendar(){
+  const page=document.getElementById('calendarPage');
+  if(page)page.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function goToChannelTasks(){
+  const section=document.getElementById('channels');
+  if(section) section.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function resetDaily(){if(confirm('일일 작성 내용과 체크 상태를 초기화할까요? 채널 구성과 DAILY TO DO 항목 내용은 유지됩니다.')){localStorage.removeItem(DAILY_KEY);channels.forEach(ch=>ch.tasks.forEach(t=>t.checked=false));saveChannels();dailyTodoItems.forEach(item=>item.checked=false);saveDailyTodo();location.reload()}}
+function resetCalendar(){if(confirm('2026년 완료 기록을 모두 삭제할까요?')){localStorage.removeItem(CAL_KEY);renderMonth();toast('완료 기록을 초기화했습니다.')}}function resetDateRecord(date){const cal=JSON.parse(localStorage.getItem(CAL_KEY)||'{}');if(!cal[date]||!cal[date].length){toast(`${date}에 저장된 완료 기록이 없습니다.`);return}if(confirm(`${date}의 완료 기록만 삭제할까요?`)){delete cal[date];localStorage.setItem(CAL_KEY,JSON.stringify(cal));renderMonth();toast(`${date} 완료 기록을 삭제했습니다.`)}}
+document.getElementById('addBlogBtn').addEventListener('click',()=>addChannel('blog'));document.getElementById('addInstaBtn').addEventListener('click',()=>addChannel('instagram'));document.getElementById('addBlogspotBtn').addEventListener('click',()=>addChannel('blogspot'));document.getElementById('addYoutubeBtn').addEventListener('click',()=>addChannel('youtube'));document.addEventListener('input',e=>{if(e.target.classList&&e.target.classList.contains('static-edit'))saveDailyStatic()});document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('static-check'))saveDailyStatic()});workDate.addEventListener('change',()=>{channels.forEach(ch=>ch.tasks.forEach(t=>t.checked=false));saveChannels();document.querySelectorAll('.daily-page .static-check').forEach(c=>c.checked=false);resetDailyTodoChecks();localStorage.setItem(DAILY_TODO_LAST_DATE_KEY,workDate.value);updateDay();saveDailyStatic();document.getElementById('monthSelect').value=String(Number(workDate.value.slice(5,7)));localStorage.setItem(MONTH_KEY,String(Number(workDate.value.slice(5,7))));const hs=document.getElementById('dailyTodoHistoryMonth');if(hs)hs.value=String(Number(workDate.value.slice(5,7)));renderDailyTodoHistory();renderChannels();renderMonth();toast('날짜가 변경되어 일일 체크 항목을 초기화했습니다.')});
+document.querySelectorAll('[contenteditable=true],input,textarea').forEach(el=>el.setAttribute('spellcheck','false'));
+document.getElementById('dailyTodoAddBtn').addEventListener('click',addDailyTodo);
+document.getElementById('dailyTodoHistorySearch').addEventListener('input',renderDailyTodoHistory);
+document.getElementById('dailyTodoHistoryClear').addEventListener('click',()=>{document.getElementById('dailyTodoHistorySearch').value='';renderDailyTodoHistory()});
+loadDailyTodo();
+prepareDailyTodoForOpeningDate();
+renderDailyTodo();
+loadDailyStatic();
+setOpeningDateToToday();
+loadChannels();
+renderChannels();
+renderLegend();
+setupMonths();
+setupDailyTodoHistoryMonths();
+renderDailyTodoHistory();
+document.getElementById('monthSelect').value=String(Number(workDate.value.slice(5,7)));
+localStorage.setItem(MONTH_KEY,String(Number(workDate.value.slice(5,7))));
+renderMonth();
+</script>
+</body></html>
